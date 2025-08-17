@@ -138,6 +138,70 @@
    */
 
   /**
+   * Protocol icons: inject logos from local assets into .protocol-card .protocol-icon
+   * Avoids external CDNs. Falls back to badge if logo fails.
+   */
+  function initProtocolIcons() {
+    const cards = document.querySelectorAll('.protocol-card');
+    if (!cards.length) return;
+
+    const logoFile = {
+      BTC: 'btc.svg',
+      ETH: 'eth.svg',
+      POL: 'pol.svg',
+      BNB: 'bnb.svg',
+      TRX: 'trx.svg',
+      SOL: 'sol.svg',
+      AVAX: 'avax.svg',
+      ARB: 'arb.svg',
+      OP: 'op.svg',
+      BASE: 'base.svg',
+      ZK: 'zk.svg',
+      STRK: 'strk.svg',
+      XRP: 'xrp.svg',
+      XLM: 'xlm.svg',
+      LTC: 'ltc.svg',
+      BCH: 'bch.svg',
+      ADA: 'ada.svg',
+      DOT: 'dot.svg',
+      XTZ: 'xtz.svg',
+      ALGO: 'algo.svg',
+      NEAR: 'near.svg',
+      ATOM: 'atom.svg'
+    };
+
+    cards.forEach(card => {
+      const iconBox = card.querySelector('.protocol-icon');
+      if (!iconBox) return;
+      const badgeEl = iconBox.querySelector('.protocol-badge');
+      const symbol = badgeEl ? badgeEl.textContent.trim().toUpperCase() : null;
+      if (!symbol || !logoFile[symbol]) return;
+
+      const file = logoFile[symbol];
+      const img = new Image();
+      img.className = 'protocol-logo';
+      const name = card.querySelector('.protocol-name')?.textContent?.trim() || symbol;
+      img.alt = name + ' logo';
+      img.src = `assets/img/protocols/${file}`;
+
+      img.onerror = () => {
+        // Fallback to badge on failure
+        if (!iconBox.querySelector('.protocol-badge') && badgeEl) {
+          iconBox.innerHTML = '';
+          iconBox.appendChild(badgeEl);
+        }
+      };
+
+      img.onload = () => {
+        iconBox.innerHTML = '';
+        iconBox.appendChild(img);
+      };
+    });
+  }
+
+  window.addEventListener('load', initProtocolIcons);
+
+  /**
    * Frequently Asked Questions Toggle
    */
   document.querySelectorAll('.faq-item h3, .faq-item .faq-toggle').forEach((faqItem) => {
