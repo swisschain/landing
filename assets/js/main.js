@@ -134,37 +134,8 @@
   window.addEventListener("load", initSwiper);
 
   /**
-   * Init isotope layout and filters
+   * Isotope disabled: portfolio now uses a simple responsive grid without filtering.
    */
-  document.querySelectorAll('.isotope-layout').forEach(function(isotopeItem) {
-    let layout = isotopeItem.getAttribute('data-layout') ?? 'masonry';
-    let filter = isotopeItem.getAttribute('data-default-filter') ?? '*';
-    let sort = isotopeItem.getAttribute('data-sort') ?? 'original-order';
-
-    let initIsotope;
-    imagesLoaded(isotopeItem.querySelector('.isotope-container'), function() {
-      initIsotope = new Isotope(isotopeItem.querySelector('.isotope-container'), {
-        itemSelector: '.isotope-item',
-        layoutMode: layout,
-        filter: filter,
-        sortBy: sort
-      });
-    });
-
-    isotopeItem.querySelectorAll('.isotope-filters li').forEach(function(filters) {
-      filters.addEventListener('click', function() {
-        isotopeItem.querySelector('.isotope-filters .filter-active').classList.remove('filter-active');
-        this.classList.add('filter-active');
-        initIsotope.arrange({
-          filter: this.getAttribute('data-filter')
-        });
-        if (typeof aosInit === 'function') {
-          aosInit();
-        }
-      }, false);
-    });
-
-  });
 
   /**
    * Frequently Asked Questions Toggle
@@ -214,5 +185,52 @@
   }
   window.addEventListener('load', navmenuScrollspy);
   document.addEventListener('scroll', navmenuScrollspy);
+
+  /**
+   * Copy email to clipboard with feedback
+   */
+  document.querySelectorAll('.copy-email').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const email = btn.getAttribute('data-copy');
+      const icon = btn.querySelector('i');
+      const textSpan = btn.querySelector('span');
+
+      let copied = false;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(email);
+          copied = true;
+        } catch (e) { /* no-op, fallback below */ }
+      }
+
+      if (!copied) {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = email;
+          ta.setAttribute('readonly', '');
+          ta.style.position = 'absolute';
+          ta.style.left = '-9999px';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          copied = true;
+        } catch (e) { /* ignore */ }
+      }
+
+      if (copied) {
+        const oldText = textSpan ? textSpan.textContent : '';
+        const oldIcon = icon ? icon.className : '';
+        btn.disabled = true;
+        if (icon) icon.className = 'bi bi-clipboard-check';
+        if (textSpan) textSpan.textContent = 'Copied!';
+        setTimeout(() => {
+          if (icon) icon.className = oldIcon || 'bi bi-clipboard';
+          if (textSpan) textSpan.textContent = oldText || 'Copy';
+          btn.disabled = false;
+        }, 1500);
+      }
+    });
+  });
 
 })();
